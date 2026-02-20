@@ -18,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
-        "Salom! Bu son o'yini. Qaysi diapazonda o'ynaymiz?", reply_markup=reply_markup
+        "HELLO😃! This is the GUESS NUMBER game. Which range would you like to play?😎", reply_markup=reply_markup
     )
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -28,10 +28,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "range_50":
         games[chat_id]["ran"] = random.randint(1, 50)
-        await query.edit_message_text("1 dan 50 gacha son o'yladim. Topishga harakat qiling!")
+        await query.edit_message_text("I chose a number from 1 to 50. Try to find, buddy!😌")
     elif query.data == "range_100":
         games[chat_id]["ran"] = random.randint(1, 100)
-        await query.edit_message_text("1 dan 100 gacha son o'yladim. Topishga harakat qiling!")
+        await query.edit_message_text("I chose a number from 1 to 100. Try to find, buddy!😏")
 
 async def start_pc_guessing(chat_id, context, update_obj):
     """PC starts guessing user's number using binary search."""
@@ -44,15 +44,15 @@ async def start_pc_guessing(chat_id, context, update_obj):
     game["pc_current"] = mid
 
     keyboard = [
-        [InlineKeyboardButton("Kattaroq ⬆️", callback_data="pc_higher"),
-         InlineKeyboardButton("Kichikroq ⬇️", callback_data="pc_lower"),
-         InlineKeyboardButton("To'g'ri ✅", callback_data="pc_correct")]
+        [InlineKeyboardButton("HIGHER ⬆️", callback_data="pc_higher"),
+         InlineKeyboardButton("LOWER ⬇️", callback_data="pc_lower"),
+         InlineKeyboardButton("CORRECT ✅", callback_data="pc_correct")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await context.bot.send_message(
         chat_id=chat_id,
-        text=f"Endi men sizning sonizni topaman!\n1 dan 100 gacha son o'ylang.\n\nMening taxminim: {mid}",
+        text=f"So, now I will try to find your number!🧐\n1 Choose a number from 1 to 100.\n\nI would say🙂‍↕️: {mid}",
         reply_markup=reply_markup
     )
 
@@ -60,35 +60,35 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat.id
 
     if chat_id not in games:
-        await update.message.reply_text("Avval /start buyrug'ini bering.")
+        await update.message.reply_text("FIRST, click /start button🫢.")
         return
 
     game = games[chat_id]
 
     if game.get("phase") == "pc_guesses":
-        await update.message.reply_text("Hozir men sizning sonizni topish navbatim! Tugmalardan foydalaning.")
+        await update.message.reply_text("It is my turn to find your number! Use buttons😙.")
         return
 
     if game.get("await_restart"):
-        await update.message.reply_text("O'yin tugadi. Yana /start bilan qayta boshlang!")
+        await update.message.reply_text("Game over. Begin with /start again.")
         return
 
     try:
         num = int(update.message.text)
     except:
-        await update.message.reply_text("Iltimos, faqat son kiriting.")
+        await update.message.reply_text("Please, enter only number😤.")
         return
 
     game["tries"] += 1
 
     if num > game["ran"]:
-        await update.message.reply_text("Xato! Men o'ylagan son kichikroq.")
+        await update.message.reply_text("NOPE, my number is lower🤏")
     elif num < game["ran"]:
-        await update.message.reply_text("Xato! Men o'ylagan son kattaroq.")
+        await update.message.reply_text("Nahh, my number is higher👆.")
     else:
         await update.message.reply_text(
-            f"TOPDINGIZ! {game['ran']} sonini o'ylagan edim. Siz {game['tries']}-urinishda topdiz. 🎉\n\n"
-            "Endi sizning navbatingiz — men sizning sonizni topaman!"
+            f"You FOUND! I choose exactly {game['ran']} . You found in {game['tries']} try. 🎉\n\n"
+            "It is your turn now!🙄 — I will find your number!"
         )
         await start_pc_guessing(chat_id, context, update)
 
@@ -101,12 +101,12 @@ async def pc_guess_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data == "pc_correct":
         game["pc_tries"] += 1
-        keyboard = [[InlineKeyboardButton("Ha ✅", callback_data="play_again"),
-                     InlineKeyboardButton("Yo'q ❌", callback_data="quit")]]
+        keyboard = [[InlineKeyboardButton("YES ✅", callback_data="play_again"),
+                     InlineKeyboardButton("NO ❌", callback_data="quit")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(
-            f"🎉 TOPDIM! {game['pc_current']} son edi! Men {game['pc_tries']}-urinishda topdim!\n\n"
-            "Yana o'ynashni xohlaysizmi?",
+            f"🎉 I found it! It was {game['pc_current']}! I found in {game['pc_tries']} try!\n\n"
+            "Would you like to play more?🤭",
             reply_markup=reply_markup
         )
         game["phase"] = "done"
@@ -115,14 +115,14 @@ async def pc_guess_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         game["pc_tries"] += 1
         game["pc_low"] = game["pc_current"] + 1
         if game["pc_low"] > game["pc_high"]:
-            await query.edit_message_text("Xato javob berdingiz yoki son 1-100 oralig'ida emas!")
+            await query.edit_message_text("Error or it is higher than 100!")
             return
         mid = (game["pc_low"] + game["pc_high"]) // 2
         game["pc_current"] = mid
         keyboard = [
-            [InlineKeyboardButton("Kattaroq ⬆️", callback_data="pc_higher"),
-             InlineKeyboardButton("Kichikroq ⬇️", callback_data="pc_lower"),
-             InlineKeyboardButton("To'g'ri ✅", callback_data="pc_correct")]
+            [InlineKeyboardButton("HIGHER ⬆️", callback_data="pc_higher"),
+             InlineKeyboardButton("LOWER ⬇️", callback_data="pc_lower"),
+             InlineKeyboardButton("CORRECT ✅", callback_data="pc_correct")]
         ]
         await query.edit_message_text(
             f"Mening taxminim: {mid}", reply_markup=InlineKeyboardMarkup(keyboard)
@@ -132,14 +132,14 @@ async def pc_guess_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         game["pc_tries"] += 1
         game["pc_high"] = game["pc_current"] - 1
         if game["pc_high"] < game["pc_low"]:
-            await query.edit_message_text("Xato javob berdingiz yoki son 1-100 oralig'ida emas!")
+            await query.edit_message_text("Error or it is higher than 100!!")
             return
         mid = (game["pc_low"] + game["pc_high"]) // 2
         game["pc_current"] = mid
         keyboard = [
-            [InlineKeyboardButton("Kattaroq ⬆️", callback_data="pc_higher"),
-             InlineKeyboardButton("Kichikroq ⬇️", callback_data="pc_lower"),
-             InlineKeyboardButton("To'g'ri ✅", callback_data="pc_correct")]
+            [InlineKeyboardButton("HIGHER ⬆️", callback_data="pc_higher"),
+             InlineKeyboardButton("LOWER ⬇️", callback_data="pc_lower"),
+             InlineKeyboardButton("CORRECT ✅", callback_data="pc_correct")]
         ]
         await query.edit_message_text(
             f"Mening taxminim: {mid}", reply_markup=InlineKeyboardMarkup(keyboard)
@@ -152,9 +152,9 @@ async def play_again_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     if query.data == "play_again":
         games[chat_id] = {"ran": random.randint(1, 100), "tries": 0, "await_restart": False, "phase": "user_guesses"}
-        await query.edit_message_text("Yangi o'yin boshlandi! 1 dan 100 gacha son o'yladim. Topishga harakat qiling!")
+        await query.edit_message_text("New game has began! I chose a number from 1 to 100. Try to find, buddy!😏")
     elif query.data == "quit":
-        await query.edit_message_text("O'yin tugadi. Yana /start bilan qayta boshlang!")
+        await query.edit_message_text("Game over. To start again click /start!")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("/start - o'yinni boshlash\n<son> - taxmin qilish")
